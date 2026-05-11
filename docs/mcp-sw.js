@@ -88,6 +88,9 @@ const TOOLS = [
 // ── KV Store (SW-side, for tools handled directly in SW) ────────
 const kvStore = {};
 
+// ── Shutdown flag ────────────────────────────────────────────────
+let swActive = true;
+
 // ── Lifecycle hooks ──────────────────────────────────────────────
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -96,9 +99,21 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+/**
+ * Listen for shutdown signal from the page.
+ * On shutdown: stop intercepting fetch requests so the MCP client
+ * can no longer connect through this SW.
+ */
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'mcp-shutdown') {
+    swActive = false;
+  }
+});
+
 // ── Fetch interception ──────────────────────────────────────────
 
 self.addEventListener('fetch', (event) => {
+  if (!swActive) return; // Shut down — let all requests pass through
   const url = new URL(event.request.url);
   if (!url.pathname.startsWith(MCP_PREFIX)) return;
 
