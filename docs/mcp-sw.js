@@ -116,6 +116,76 @@ const TOOLS = [
       required: ['abc_notation'],
     },
   },
+  {
+    name: 'notes_list',
+    description:
+      'List all notes. ' +
+      'Use this to view saved notes, search through notes by content or title, or get an overview of all notes.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        search: {
+          type: 'string',
+          description: 'Optional search text to filter notes by content or title (case-insensitive).',
+        },
+      },
+    },
+  },
+  {
+    name: 'notes_get',
+    description:
+      'Get a single note by its id. ' +
+      'Use this to retrieve the full content of a specific note.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Note id to retrieve.' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'notes_create',
+    description:
+      'Create a new note with the given content and optional title. ' +
+      'The note will be added with an auto-generated id and timestamp.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        content: { type: 'string', description: 'Note content (markdown supported).' },
+        title: { type: 'string', description: 'Optional note title.' },
+      },
+      required: ['content'],
+    },
+  },
+  {
+    name: 'notes_update',
+    description:
+      'Update an existing note content and/or title by its id. ' +
+      'Only provided fields will be updated; omitted fields keep their existing values.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Note id to update.' },
+        content: { type: 'string', description: 'New note content (omit to keep existing).' },
+        title: { type: 'string', description: 'New note title (omit to keep existing).' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'notes_delete',
+    description:
+      'Delete a note by its id. ' +
+      'Use this to remove unwanted or outdated notes.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Note id to delete.' },
+      },
+      required: ['id'],
+    },
+  },
 ];
 
 // ── KV Store (SW-side, for tools handled directly in SW) ────────
@@ -215,7 +285,7 @@ function executeToolInSw(name, args) {
       return { content: [{ type: 'text', text: JSON.stringify({ ok: true, key: args.key, value }) }] };
     }
     default:
-      return { content: [{ type: 'text', text: JSON.stringify({ error: 'Unknown tool: ' + name }) }], isError: true };
+      return { content: [{ type: 'text', text: JSON.stringify({ error: `Unknown tool: ${name}` }) }], isError: true };
   }
 }
 
