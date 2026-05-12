@@ -24,7 +24,7 @@ const TOOLS = [
     description:
       'Execute JavaScript code in the browser sandbox. ' +
       'Available globals: _ (lodash), axios, Dexie, nanoid, md5, clipboard, ' +
-      'jszip, pako, yaml, JSON5, FileSaver, localforage, etc. ' +
+      'jszip, pako, yaml, JSON5, FileSaver, localforage, abcjs, etc. ' +
       'The last expression value is returned. Promises are auto-resolved. ' +
       'Use console.log() for debug output.',
     inputSchema: {
@@ -81,6 +81,39 @@ const TOOLS = [
         },
       },
       required: ['html'],
+    },
+  },
+  {
+    name: 'render_abc_music',
+    description:
+      'Render ABC music notation as sheet music on the visual canvas. ' +
+      'Use this to display musical scores, melodies, or any ABC notation as formatted sheet music. ' +
+      'The ABC notation will be rendered as SVG sheet music in the canvas iframe.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        abc_notation: {
+          type: 'string',
+          description: 'ABC notation string. Example: "X:1\\nM:4/4\\nK:C\\n| C D E F | G A B c |"',
+        },
+      },
+      required: ['abc_notation'],
+    },
+  },
+  {
+    name: 'play_abc_music',
+    description:
+      'Play ABC music notation using the Web Audio API. ' +
+      'Use this to play melodies, test musical ideas, or let the user hear the composed music.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        abc_notation: {
+          type: 'string',
+          description: 'ABC notation string to play. Example: "X:1\\nM:4/4\\nK:C\\n| C D E F | G A B c |"',
+        },
+      },
+      required: ['abc_notation'],
     },
   },
 ];
@@ -167,7 +200,7 @@ async function handleToolCall(id, params) {
     return jsonRpcResponse(id, executeToolInSw(params.name, params.arguments));
   }
 
-  // execute_javascript and render_html need page context — proxy via MessageChannel
+  // execute_javascript, render_html, render_abc_music, play_abc_music need page context — proxy via MessageChannel
   const result = await proxyToPage(params);
   return jsonRpcResponse(id, result);
 }
